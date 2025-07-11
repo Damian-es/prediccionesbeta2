@@ -1,0 +1,6 @@
+Zona	Temperatura 	Velocidad del Viento	Humedad
+Valle	16	18	75
+Norte	19	16	70
+Sur	16	16	72
+Centro	18	11	74
+Pintag	16	18	73
