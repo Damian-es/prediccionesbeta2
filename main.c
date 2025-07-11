@@ -28,6 +28,42 @@ void mostrarTabla(int indiceZona, const char* nombreZona, DatosZona* zona, Datos
     printf("Recomendacion: %s\n\n", recomendacion);
 }
 
+#include <string.h>
+
+// Helper function to convert a string to lowercase
+void toLowerCase(char* str) {
+    for (int i = 0; str[i]; i++) {
+        if (str[i] >= 'A' && str[i] <= 'Z') {
+            str[i] = str[i] + ('a' - 'A');
+        }
+    }
+}
+
+// Function to search zones by substring (case-insensitive) and display matches
+void buscarZonas(const char* zonasNombres[], int numZonas, const char* terminoBusqueda) {
+    printf("Zonas que coinciden con '%s':\n", terminoBusqueda);
+    int found = 0;
+    char terminoLower[100];
+    strncpy(terminoLower, terminoBusqueda, sizeof(terminoLower));
+    terminoLower[sizeof(terminoLower) - 1] = '\0';
+    toLowerCase(terminoLower);
+
+    for (int i = 0; i < numZonas; i++) {
+        char zonaLower[100];
+        strncpy(zonaLower, zonasNombres[i], sizeof(zonaLower));
+        zonaLower[sizeof(zonaLower) - 1] = '\0';
+        toLowerCase(zonaLower);
+
+        if (strstr(zonaLower, terminoLower) != NULL) {
+            printf("%d. %s\n", i + 1, zonasNombres[i]);
+            found = 1;
+        }
+    }
+    if (!found) {
+        printf("No se encontraron zonas que coincidan con '%s'.\n", terminoBusqueda);
+    }
+}
+
 int main() {
     DatosZona zonas[NUM_ZONAS];
     Prediccion predicciones[NUM_ZONAS];
@@ -89,29 +125,43 @@ int main() {
     }
     generarRecomendaciones(alertasActual, recomendaciones);
 
-    // Guardar reporte en archivo
-    if (!guardarReporte(zonas, predicciones, archivoReporte)) {
-        printf("Error al guardar el reporte.\n");
-    } else {
-        printf("Reporte guardado en %s\n", archivoReporte);
-    }
-
-    // Menu para seleccionar zona a mostrar
     int opcion = -1;
     while (opcion != 0) {
-        printf("\nMenu de Zonas:\n");
-        for (int i = 0; i < NUM_ZONAS; i++) {
-            printf("%d. %s\n", i + 1, zonasNombres[i]);
-        }
+        printf("\nMenu:\n");
+        printf("1. Mostrar lista de zonas y seleccionar una\n");
+        printf("2. Cargar y mostrar datos de todas las zonas\n");
+        printf("3. Guardar reporte\n");
         printf("0. Salir\n");
-        printf("Seleccione una zona para ver los resultados: ");
+        printf("Seleccione una opcion: ");
         if (scanf("%d", &opcion) != 1) {
             while(getchar() != '\n'); // limpiar buffer
             printf("Entrada invalida. Intente de nuevo.\n");
             continue;
         }
-        if (opcion > 0 && opcion <= NUM_ZONAS) {
-            mostrarTabla(opcion - 1, zonasNombres[opcion - 1], &zonas[opcion - 1], promedios[opcion - 1], predicciones[opcion - 1], alertasActual[opcion - 1], recomendaciones[opcion - 1]);
+        if (opcion == 1) {
+            printf("Zonas disponibles:\n");
+            for (int i = 0; i < NUM_ZONAS; i++) {
+                printf("%d. %s\n", i + 1, zonasNombres[i]);
+            }
+            printf("Seleccione una zona para ver los resultados: ");
+            int zonaSeleccionada;
+            if (scanf("%d", &zonaSeleccionada) != 1 || zonaSeleccionada < 1 || zonaSeleccionada > NUM_ZONAS) {
+                while(getchar() != '\n');
+                printf("Seleccion invalida.\n");
+                continue;
+            }
+            mostrarTabla(zonaSeleccionada - 1, zonasNombres[zonaSeleccionada - 1], &zonas[zonaSeleccionada - 1], promedios[zonaSeleccionada - 1], predicciones[zonaSeleccionada - 1], alertasActual[zonaSeleccionada - 1], recomendaciones[zonaSeleccionada - 1]);
+        } else if (opcion == 2) {
+            printf("Mostrando datos de todas las zonas:\n");
+            for (int i = 0; i < NUM_ZONAS; i++) {
+                mostrarTabla(i, zonasNombres[i], &zonas[i], promedios[i], predicciones[i], alertasActual[i], recomendaciones[i]);
+            }
+        } else if (opcion == 3) {
+            if (!guardarReporte(zonas, predicciones, archivoReporte)) {
+                printf("Error al guardar el reporte.\n");
+            } else {
+                printf("Reporte guardado en %s\n", archivoReporte);
+            }
         } else if (opcion != 0) {
             printf("Opcion no valida. Intente de nuevo.\n");
         }
